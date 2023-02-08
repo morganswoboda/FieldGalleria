@@ -6,8 +6,6 @@ output: github_document
 ---
 
 ```{r, eval = TRUE}
-# update packages, without prompts for permission/clarification
-update.packages(ask = FALSE)
 
 #install.packages("emmeans")
 #install.packages("ggthemes")

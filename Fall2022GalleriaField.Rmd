@@ -19,22 +19,26 @@ library(ggthemes)
 library(RColorBrewer)
 
 #import data
-Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv")
+Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv", )
 
 #make treatments and varieties into factors
 Fall22EPF$treatment = factor(Fall22EPF$treatment, levels = c("Control", "10Met", "10Bb"))
 Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
+Fall22EPF$num.dead = as.numeric(Fall22EPF$num.dead)
+Fall22EPF$num.pupae = as.numeric(Fall22EPF$num.pupae)
+Fall22EPF$total.out = as.numeric(Fall22EPF$total.out)
+Fall22EPF$num.met.infect = as.numeric(Fall22EPF$num.met.infect)
 ```
 
 #Prelim data check
-```{r}
+```{r, eval=TRUE}
 ggplot(data = Fall22EPF, aes(x = treatment, y = perc.inf.total, color = variety)) + geom_boxplot() + ggtitle("Total infection")
 #everything looks ok
 
 ggplot(data = Fall22EPF, aes(x = treatment, y = perc.met.total, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
 ```
 # Stats for Metarhizium - normal ANOVA way?
-```{r}
+```{r,eval=TRUE}
 attach(Fall22EPF)
 
 ##two way ANOVA
@@ -60,7 +64,7 @@ detach(Fall22EPF)
 
 # Try a different type of analysis? Could this data be proportions?
 ## X is categorical, unsure what to do with Y? 
-```{r}
+```{r, eval=TRUE}
 attach(Fall22EPF)
 
 head(Fall22EPF)
@@ -68,7 +72,34 @@ par(mfrow = c(1,2))
 
 inf.proportion <- num.met.infect/total.out #looking for the proportion of metarhizium infections out of the number of removed insects
 plot(treatment, inf.proportion, ylab = "proportion met infected", xlab("Treatment"))
-plot(treatment, log(inf.proportion), ylab = "proportion met infected", xlab("Treatment"))
+plot(treatment, log(inf.proportion), ylab = "(log)proportion met infected", xlab("Treatment")) #messes up the plots because of an outlier?
+
+detach(Fall22EPF)
 ```
 
+#Try a GLM?
+## can use a GLM when the variance is not constant, and/or when the errors are not normally distributed
+### Might consider using GLMs when the response variable is: count data expressed as proportions, count data that are not proportions, binary response variables, data on time to death where the varience increases faster than linearly with the mean
+```{r, eval=TRUE}
+attach(Fall22EPF)
+names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited Metarhizium infections
+
+#look at main effect means
+tapply(num.met.infect, treatment, mean)
+tapply(num.met.infect, variety, mean)
+
+#glm model of interactions between treatment and variety
+glmmodel <- glm(num.met.infect ~ treatment * variety, poisson)
+summary(glmmodel) #no interaction, remove variety as a main effect
+
+model2 <- glm(num.met.infect ~ treatment, poisson)
+summary(model2)
+
+#see how the models compare to each other using an anova
+anova(glmmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2
+```
+# Plot the GLM model
+```{r, eval=TRUE}
+
+```
 

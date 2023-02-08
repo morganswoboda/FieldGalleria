@@ -31,11 +31,15 @@ library(ggthemes)
 library(RColorBrewer)
 
 #import data
-Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv")
+Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv", )
 
 #make treatments and varieties into factors
 Fall22EPF$treatment = factor(Fall22EPF$treatment, levels = c("Control", "10Met", "10Bb"))
 Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
+Fall22EPF$num.dead = as.numeric(Fall22EPF$num.dead)
+Fall22EPF$num.pupae = as.numeric(Fall22EPF$num.pupae)
+Fall22EPF$total.out = as.numeric(Fall22EPF$total.out)
+Fall22EPF$num.met.infect = as.numeric(Fall22EPF$num.met.infect)
 ```
 
 \#Prelim data check
@@ -203,10 +207,123 @@ par(mfrow = c(1,2))
 
 inf.proportion <- num.met.infect/total.out #looking for the proportion of metarhizium infections out of the number of removed insects
 plot(treatment, inf.proportion, ylab = "proportion met infected", xlab("Treatment"))
-plot(treatment, log(inf.proportion), ylab = "proportion met infected", xlab("Treatment"))
+plot(treatment, log(inf.proportion), ylab = "(log)proportion met infected", xlab("Treatment")) #messes up the plots because of an outlier?
 ```
 
     ## Warning in bplt(at[i], wid = width[i], stats = z$stats[, i], out =
     ## z$out[z$group == : Outlier (-Inf) in boxplot 1 is not drawn
 
 ![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+``` r
+detach(Fall22EPF)
+```
+
+\#Try a GLM? \## can use a GLM when the variance is not constant, and/or
+when the errors are not normally distributed \### Might consider using
+GLMs when the response variable is: count data expressed as proportions,
+count data that are not proportions, binary response variables, data on
+time to death where the varience increases faster than linearly with the
+mean
+
+``` r
+attach(Fall22EPF)
+names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited Metarhizium infections
+```
+
+    ##  [1] "pot.ID"         "treatment"      "variety"        "num.dead"      
+    ##  [5] "num.pupae"      "perc.pupated"   "total.out"      "num.infect"    
+    ##  [9] "num.bb.infect"  "num.met.infect" "perc.inf.total" "perc.bb.total" 
+    ## [13] "perc.met.total"
+
+``` r
+#look at main effect means
+tapply(num.met.infect, treatment, mean)
+```
+
+    ##  Control    10Met     10Bb 
+    ## 1.833333 1.833333 1.666667
+
+``` r
+tapply(num.met.infect, variety, mean)
+```
+
+    ##  Cochise   Armani 
+    ## 1.555556 2.000000
+
+``` r
+#glm model of interactions between treatment and variety
+glmmodel <- glm(num.met.infect ~ treatment * variety, poisson)
+summary(glmmodel) #no interaction, remove variety as a main effect
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = num.met.infect ~ treatment * variety, family = poisson)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -2.1603  -1.6330  -0.6741   0.8386   2.4257  
+    ## 
+    ## Coefficients:
+    ##                                Estimate Std. Error z value Pr(>|z|)  
+    ## (Intercept)                   6.061e-01  3.015e-01   2.010   0.0444 *
+    ## treatment10Met               -3.185e-01  4.646e-01  -0.685   0.4931  
+    ## treatment10Bb                -2.007e-01  4.495e-01  -0.446   0.6553  
+    ## varietyArmani                 3.024e-10  4.264e-01   0.000   1.0000  
+    ## treatment10Met:varietyArmani  5.596e-01  6.150e-01   0.910   0.3628  
+    ## treatment10Bb:varietyArmani   2.007e-01  6.195e-01   0.324   0.7460  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for poisson family taken to be 1)
+    ## 
+    ##     Null deviance: 63.726  on 35  degrees of freedom
+    ## Residual deviance: 61.742  on 30  degrees of freedom
+    ## AIC: 142.56
+    ## 
+    ## Number of Fisher Scoring iterations: 5
+
+``` r
+model2 <- glm(num.met.infect ~ treatment, poisson)
+summary(model2)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = num.met.infect ~ treatment, family = poisson)
+    ## 
+    ## Deviance Residuals: 
+    ##     Min       1Q   Median       3Q      Max  
+    ## -1.9148  -1.8257  -0.6162   0.9274   1.9235  
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error z value Pr(>|z|)   
+    ## (Intercept)     6.061e-01  2.132e-01   2.843  0.00447 **
+    ## treatment10Met  1.118e-10  3.015e-01   0.000  1.00000   
+    ## treatment10Bb  -9.531e-02  3.090e-01  -0.308  0.75771   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for poisson family taken to be 1)
+    ## 
+    ##     Null deviance: 63.726  on 35  degrees of freedom
+    ## Residual deviance: 63.600  on 33  degrees of freedom
+    ## AIC: 138.41
+    ## 
+    ## Number of Fisher Scoring iterations: 5
+
+``` r
+#see how the models compare to each other using an anova
+anova(glmmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2
+```
+
+    ## Analysis of Deviance Table
+    ## 
+    ## Model 1: num.met.infect ~ treatment * variety
+    ## Model 2: num.met.infect ~ treatment
+    ##   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
+    ## 1        30     61.742                     
+    ## 2        33     63.600 -3  -1.8576   0.6025
+
+# Plot the GLM model

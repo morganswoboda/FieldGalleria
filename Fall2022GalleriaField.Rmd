@@ -19,7 +19,7 @@ library(ggthemes)
 library(RColorBrewer)
 
 #import data
-Fall22EPF <- read.csv("Fall 22 epf bioassay.csv")
+Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv")
 
 #make treatments and varieties into factors
 Fall22EPF$treatment = factor(Fall22EPF$treatment, levels = c("Control", "10Met", "10Bb"))
@@ -56,6 +56,11 @@ MetF22KW <- kruskal.test(perc.met.total~treatment)
 print(MetF22KW) #not significant
 
 detach(Fall22EPF)
+```
+# Try a different type of analysis? Could this data be proportions?
+## X is categorical, y is 
+```{r}
+
 ```
 
 

@@ -57,10 +57,18 @@ print(MetF22KW) #not significant
 
 detach(Fall22EPF)
 ```
-# Try a different type of analysis? Could this data be proportions?
-## X is categorical, y is 
-```{r}
 
+# Try a different type of analysis? Could this data be proportions?
+## X is categorical, unsure what to do with Y? 
+```{r}
+attach(Fall22EPF)
+
+head(Fall22EPF)
+par(mfrow = c(1,2))
+
+inf.proportion <- num.met.infect/total.out #looking for the proportion of metarhizium infections out of the number of removed insects
+plot(treatment, inf.proportion, ylab = "proportion met infected", xlab("Treatment"))
+plot(treatment, log(inf.proportion), ylab = "proportion met infected", xlab("Treatment"))
 ```
 
 

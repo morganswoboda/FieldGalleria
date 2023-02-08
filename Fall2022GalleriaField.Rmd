@@ -2,7 +2,7 @@
 title: "Fall 2022 Galleria field infection data"
 author: "Morgan Swoboda"
 date: "2023-02-08"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}

@@ -35,7 +35,8 @@ Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
 #histogram of the distribution of number of metarhizium infected insects
 hist(Fall22EPF$num.met.infect)
 
-ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
+ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + 
+  ggtitle("Metarhizium infection")
 ```
 
 # Stats for Metarhizium - normal ANOVA way?
@@ -67,7 +68,8 @@ plot(treatment, prop.met.inf, ylab = "proportion met infected", xlab("Treatment"
 
 #nice plot
 met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fill = treatment)) + 
-  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + 
+  scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
   geom_errorbar(stat = "summary", fun.data = "mean_se", aes(x=treatment), position = "dodge", width = 0.5) + 
   ylab("Proportion of G. mellonella infected by M. anisopliae") + 
   theme_classic() + theme(text = element_text(size=15)) + 
@@ -85,7 +87,10 @@ met.inf.F22
 ## can use a GLM when the variance is not constant, and/or when the errors are not normally distributed
 ### Might consider using GLMs when the response variable is: count data expressed as proportions, count data that are not proportions, binary response variables, data on time to death where the varience increases faster than linearly with the mean
 ```{r, eval=TRUE}
-names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited Metarhizium infections
+names(Fall22EPF) 
+#num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out
+#is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited
+#Metarhizium infections
 
 #look at main effect means
 tapply(num.met.infect, treatment, mean)
@@ -108,22 +113,19 @@ summary(glmintmodel) #no interaction
 #error distribution
 
 
-#R reports two forms of deviance – the null deviance and the residual deviance.
-#The null deviance shows how well the response variable is predicted by a model
-#that includes only the intercept (grand mean). It’s a measure of badness of
-#fit–higher numbers indicate worse fit.  As a general rule of thumb, you should
-#hope that your Residual deviance is not more than twice your degrees of
+#R reports two forms of deviance – the null deviance and the residual deviance. The null deviance
+#shows how well the response variable is predicted by a model that includes only the intercept
+#(grand mean). It’s a measure of badness of fit–higher numbers indicate worse fit.  As a general
+#rule of thumb, you should hope that your Residual deviance is not more than twice your degrees of
 #freedom.
 
-#The Akaike Information Criterion (AIC) provides a method for assessing the
-#quality of your model through comparison of related models.  It’s based on the
-#Deviance, but penalizes you for making the model more complicated.  Much like
-#adjusted R-squared, it’s intent is to prevent you from including irrelevant
-#predictors. However, unlike adjusted R-squared, the number itself is not
-#meaningful. If you have more than one similar candidate models (where all of
-#the variables of the simpler model occur in the more complex models), then you
-#should select the model that has the smallest AIC. So it’s useful for comparing
-#models, but isn’t interpretable on its own.
+#The Akaike Information Criterion (AIC) provides a method for assessing the quality of your model 
+#through comparison of related models.  It’s based on the Deviance, but penalizes you for making the
+#model more complicated.  Much like adjusted R-squared, it’s intent is to prevent you from including
+#irrelevant predictors. However, unlike adjusted R-squared, the number itself is not meaningful. If
+#you have more than one similar candidate models (where all of the variables of the simpler model
+#occur in the more complex models), then you should select the model that has the smallest AIC. So
+#it’s useful for comparing models, but isn’t interpretable on its own.
 
 model2 <-  glm(num.met.infect ~ treatment, poisson)
 summary(model2)

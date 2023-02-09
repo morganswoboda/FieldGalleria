@@ -1,7 +1,7 @@
 Fall 2022 Galleria field infection data
 ================
 Morgan Swoboda
-2023-02-08
+2023-02-09
 
 # Package install and upload data sheet
 
@@ -36,24 +36,23 @@ Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv", )
 #make treatments and varieties into factors
 Fall22EPF$treatment = factor(Fall22EPF$treatment, levels = c("Control", "10Met", "10Bb"))
 Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
-Fall22EPF$num.dead = as.numeric(Fall22EPF$num.dead)
-Fall22EPF$num.pupae = as.numeric(Fall22EPF$num.pupae)
-Fall22EPF$total.out = as.numeric(Fall22EPF$total.out)
-Fall22EPF$num.met.infect = as.numeric(Fall22EPF$num.met.infect)
+#Fall22EPF$num.dead = as.numeric(Fall22EPF$num.dead)
+#Fall22EPF$num.pupae = as.numeric(Fall22EPF$num.pupae)
+#Fall22EPF$total.out = as.numeric(Fall22EPF$total.out)
+#Fall22EPF$num.met.infect = as.numeric(Fall22EPF$num.met.infect)
 ```
 
 \#Prelim data check
 
 ``` r
-ggplot(data = Fall22EPF, aes(x = treatment, y = perc.inf.total, color = variety)) + geom_boxplot() + ggtitle("Total infection")
+#histogram of the distribution of number of metarhizium infected insects
+hist(Fall22EPF$num.met.infect)
 ```
 
 ![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
-#everything looks ok
-
-ggplot(data = Fall22EPF, aes(x = treatment, y = perc.met.total, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
+ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
 ```
 
 ![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
@@ -63,15 +62,15 @@ ggplot(data = Fall22EPF, aes(x = treatment, y = perc.met.total, color = variety)
 attach(Fall22EPF)
 
 ##two way ANOVA
-two.way.Met <- aov(perc.met.total~treatment*variety)
-summary(two.way.Met) #no signifcant differences, no interaction, change to one way model instead
+two.way.Met <- aov(prop.met.inf~treatment*variety)
+summary(two.way.Met) #no signifcant differences, no interaction, change to one way model instead?
 ```
 
     ##                   Df Sum Sq Mean Sq F value Pr(>F)
-    ## treatment          2     40    19.8   0.055  0.947
-    ## variety            1    196   196.2   0.543  0.467
-    ## treatment:variety  2    150    74.8   0.207  0.814
-    ## Residuals         30  10831   361.0
+    ## treatment          2 0.0040 0.00198   0.055  0.947
+    ## variety            1 0.0196 0.01962   0.543  0.467
+    ## treatment:variety  2 0.0150 0.00748   0.207  0.814
+    ## Residuals         30 1.0831 0.03610
 
 ``` r
 summary.lm(two.way.Met)
@@ -79,36 +78,36 @@ summary.lm(two.way.Met)
 
     ## 
     ## Call:
-    ## aov(formula = perc.met.total ~ treatment * variety)
+    ## aov(formula = prop.met.inf ~ treatment * variety)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -24.073 -14.260  -7.458  13.864  41.300 
+    ## -0.2407 -0.1426 -0.0746  0.1387  0.4130 
     ## 
     ## Coefficients:
-    ##                              Estimate Std. Error t value Pr(>|t|)  
-    ## (Intercept)                   20.1583     7.7571   2.599   0.0144 *
-    ## treatment10Met                -5.8983    10.9701  -0.538   0.5948  
-    ## treatment10Bb                 -4.7883    10.9701  -0.436   0.6656  
-    ## varietyArmani                 -0.1583    10.9701  -0.014   0.9886  
-    ## treatment10Met:varietyArmani   9.9717    15.5141   0.643   0.5253  
-    ## treatment10Bb:varietyArmani    4.5100    15.5141   0.291   0.7733  
+    ##                               Estimate Std. Error t value Pr(>|t|)  
+    ## (Intercept)                   0.201587   0.077571   2.599   0.0144 *
+    ## treatment10Met               -0.058995   0.109702  -0.538   0.5947  
+    ## treatment10Bb                -0.047884   0.109702  -0.436   0.6656  
+    ## varietyArmani                -0.001587   0.109702  -0.014   0.9886  
+    ## treatment10Met:varietyArmani  0.099735   0.155142   0.643   0.5252  
+    ## treatment10Bb:varietyArmani   0.045106   0.155142   0.291   0.7733  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 19 on 30 degrees of freedom
-    ## Multiple R-squared:  0.03435,    Adjusted R-squared:  -0.1266 
-    ## F-statistic: 0.2134 on 5 and 30 DF,  p-value: 0.9541
+    ## Residual standard error: 0.19 on 30 degrees of freedom
+    ## Multiple R-squared:  0.03436,    Adjusted R-squared:  -0.1266 
+    ## F-statistic: 0.2135 on 5 and 30 DF,  p-value: 0.9541
 
 ``` r
 ##one way anova
-one.way.Met <- aov(perc.met.total~treatment)
+one.way.Met <- aov(prop.met.inf~treatment)
 summary(one.way.Met) #not significant
 ```
 
     ##             Df Sum Sq Mean Sq F value Pr(>F)
-    ## treatment    2     40    19.8   0.058  0.943
-    ## Residuals   33  11177   338.7
+    ## treatment    2  0.004 0.00198   0.058  0.943
+    ## Residuals   33  1.118 0.03387
 
 ``` r
 summary.lm(one.way.Met)
@@ -116,23 +115,23 @@ summary.lm(one.way.Met)
 
     ## 
     ## Call:
-    ## aov(formula = perc.met.total ~ treatment)
+    ## aov(formula = prop.met.inf ~ treatment)
     ## 
     ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -20.079 -17.546  -7.546  13.287  36.393 
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.20079 -0.17546 -0.07546  0.13287  0.36389 
     ## 
     ## Coefficients:
-    ##                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)     20.0792     5.3126   3.780 0.000626 ***
-    ## treatment10Met  -0.9125     7.5132  -0.121 0.904069    
-    ## treatment10Bb   -2.5333     7.5132  -0.337 0.738113    
+    ##                 Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)     0.200794   0.053127   3.780 0.000626 ***
+    ## treatment10Met -0.009127   0.075133  -0.121 0.904049    
+    ## treatment10Bb  -0.025331   0.075133  -0.337 0.738142    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 18.4 on 33 degrees of freedom
-    ## Multiple R-squared:  0.003523,   Adjusted R-squared:  -0.05687 
-    ## F-statistic: 0.05833 on 2 and 33 DF,  p-value: 0.9434
+    ## Residual standard error: 0.184 on 33 degrees of freedom
+    ## Multiple R-squared:  0.003522,   Adjusted R-squared:  -0.05687 
+    ## F-statistic: 0.05831 on 2 and 33 DF,  p-value: 0.9435
 
 ``` r
 plot(one.way.Met) #probably not normal based on QQ plot, looks like it's exponential?
@@ -148,76 +147,74 @@ shapiro.test(resid(one.way.Met)) #residuals NOT normal
     ##  Shapiro-Wilk normality test
     ## 
     ## data:  resid(one.way.Met)
-    ## W = 0.88313, p-value = 0.001218
+    ## W = 0.88312, p-value = 0.001217
 
 ``` r
-fligner.test(perc.met.total~treatment) #normal
+fligner.test(prop.met.inf~treatment) #normal
 ```
 
     ## 
     ##  Fligner-Killeen test of homogeneity of variances
     ## 
-    ## data:  perc.met.total by treatment
-    ## Fligner-Killeen:med chi-squared = 0.57668, df = 2, p-value = 0.7495
+    ## data:  prop.met.inf by treatment
+    ## Fligner-Killeen:med chi-squared = 0.5765, df = 2, p-value = 0.7496
 
 ``` r
 # KW instead since it's not normal
 ##KW for met
-MetF22KW <- kruskal.test(perc.met.total~treatment)
+MetF22KW <- kruskal.test(prop.met.inf~treatment)
 print(MetF22KW) #not significant
 ```
 
     ## 
     ##  Kruskal-Wallis rank sum test
     ## 
-    ## data:  perc.met.total by treatment
+    ## data:  prop.met.inf by treatment
     ## Kruskal-Wallis chi-squared = 0.35641, df = 2, p-value = 0.8368
 
 ``` r
-detach(Fall22EPF)
-```
-
-# Try a different type of analysis? Could this data be proportions?
-
-## X is categorical, unsure what to do with Y?
-
-``` r
-attach(Fall22EPF)
-
+#make some graphs
 head(Fall22EPF)
 ```
 
-    ##   pot.ID treatment variety num.dead num.pupae perc.pupated total.out num.infect
-    ## 1    C+1   Control Cochise        5         2     28.57143         7          1
-    ## 2    C+2   Control Cochise       10         0      0.00000        10          6
-    ## 3    C+3   Control Cochise        9         0      0.00000         9          6
-    ## 4    C+4   Control Cochise        9         0      0.00000         9          2
-    ## 5    C+5   Control Cochise        9         0      0.00000         9          2
-    ## 6    C+6   Control Cochise        9         1     10.00000        10          2
-    ##   num.bb.infect num.met.infect perc.inf.total perc.bb.total perc.met.total
-    ## 1             0              1          14.29             0          14.29
-    ## 2             0              2          60.00             0          20.00
-    ## 3             0              4          66.67             0          44.44
-    ## 4             0              1          22.22             0          11.11
-    ## 5             0              1          22.22             0          11.11
-    ## 6             0              2          20.00             0          20.00
+    ##   pot.ID treatment variety num.dead num.pupae total.out num.infect
+    ## 1    C+1   Control Cochise        5         2         7          1
+    ## 2    C+2   Control Cochise       10         0        10          6
+    ## 3    C+3   Control Cochise        9         0         9          6
+    ## 4    C+4   Control Cochise        9         0         9          2
+    ## 5    C+5   Control Cochise        9         0         9          2
+    ## 6    C+6   Control Cochise        9         1        10          2
+    ##   num.bb.infect num.met.infect prop.met.inf prop.bb.inf
+    ## 1             0              1    0.1428571           0
+    ## 2             0              2    0.2000000           0
+    ## 3             0              4    0.4444444           0
+    ## 4             0              1    0.1111111           0
+    ## 5             0              1    0.1111111           0
+    ## 6             0              2    0.2000000           0
 
 ``` r
-par(mfrow = c(1,2))
-
-inf.proportion <- num.met.infect/total.out #looking for the proportion of metarhizium infections out of the number of removed insects
-plot(treatment, inf.proportion, ylab = "proportion met infected", xlab("Treatment"))
-plot(treatment, log(inf.proportion), ylab = "(log)proportion met infected", xlab("Treatment")) #messes up the plots because of an outlier?
+plot(treatment, prop.met.inf, ylab = "proportion met infected", xlab("Treatment"))
 ```
 
-    ## Warning in bplt(at[i], wid = width[i], stats = z$stats[, i], out =
-    ## z$out[z$group == : Outlier (-Inf) in boxplot 1 is not drawn
-
-![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-3-5.png)<!-- -->
 
 ``` r
-detach(Fall22EPF)
+#nice plot
+met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fill = treatment)) + 
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
+  geom_errorbar(stat = "summary", fun.data = "mean_se", aes(x=treatment), position = "dodge", width = 0.5) + 
+  ylab("Proportion of G. mellonella infected by M. anisopliae") + 
+  theme_classic() + theme(text = element_text(size=15)) + 
+  theme(legend.position = "none") + ggtitle("Fall 2022")
+
+#centered the title and made an object
+met.inf.F22 <- met.inf.F22 + theme(plot.title = element_text(hjust = 0.5))
+met.inf.F22
 ```
+
+![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-3-6.png)<!-- -->
+
+# Try a different type of analysis? X is categorical, Y is continuous/counts (but is a proportion)
 
 \#Try a GLM? \## can use a GLM when the variance is not constant, and/or
 when the errors are not normally distributed \### Might consider using
@@ -227,14 +224,12 @@ time to death where the varience increases faster than linearly with the
 mean
 
 ``` r
-attach(Fall22EPF)
 names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited Metarhizium infections
 ```
 
     ##  [1] "pot.ID"         "treatment"      "variety"        "num.dead"      
-    ##  [5] "num.pupae"      "perc.pupated"   "total.out"      "num.infect"    
-    ##  [9] "num.bb.infect"  "num.met.infect" "perc.inf.total" "perc.bb.total" 
-    ## [13] "perc.met.total"
+    ##  [5] "num.pupae"      "total.out"      "num.infect"     "num.bb.infect" 
+    ##  [9] "num.met.infect" "prop.met.inf"   "prop.bb.inf"
 
 ``` r
 #look at main effect means
@@ -252,9 +247,35 @@ tapply(num.met.infect, variety, mean)
     ## 1.555556 2.000000
 
 ``` r
-#glm model of interactions between treatment and variety
-glmmodel <- glm(num.met.infect ~ treatment * variety, poisson)
-summary(glmmodel) #no interaction, remove variety as a main effect
+#check with error distribution works best with this data
+library(MASS)
+```
+
+    ## 
+    ## Attaching package: 'MASS'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     select
+
+``` r
+fit1 <- fitdistr(Fall22EPF$num.met.infect, "normal")
+fit2 <- fitdistr(Fall22EPF$num.met.infect, "Poisson")
+fit3 <- fitdistr(Fall22EPF$num.met.infect, "negative binomial")
+
+#check the AIC of the three error distributions
+AIC(fit1, fit2, fit3) #the smaller the AIC, the better fit. Negative binomial seems to be the best.
+```
+
+    ##      df      AIC
+    ## fit1  2 142.2973
+    ## fit2  1 134.5409
+    ## fit3  2 131.9341
+
+``` r
+#glm model of interactions between treatment and variety - Poisson error distribution
+glmintmodel <- glm(num.met.infect ~ treatment * variety, poisson)
+summary(glmintmodel) #no interaction
 ```
 
     ## 
@@ -285,7 +306,14 @@ summary(glmmodel) #no interaction, remove variety as a main effect
     ## Number of Fisher Scoring iterations: 5
 
 ``` r
-model2 <- glm(num.met.infect ~ treatment, poisson)
+#glm model of interactions between treatment and variety - negative binomial error distribution
+
+
+#R reports two forms of deviance – the null deviance and the residual deviance. The null deviance shows how well the response variable is predicted by a model that includes only the intercept (grand mean). It’s a measure of badness of fit–higher numbers indicate worse fit.  As a general rule of thumb, you should hope that your Residual deviance is not more than twice your degrees of freedom.
+
+#The Akaike Information Criterion (AIC) provides a method for assessing the quality of your model through comparison of related models.  It’s based on the Deviance, but penalizes you for making the model more complicated.  Much like adjusted R-squared, it’s intent is to prevent you from including irrelevant predictors. However, unlike adjusted R-squared, the number itself is not meaningful. If you have more than one similar candidate models (where all of the variables of the simpler model occur in the more complex models), then you should select the model that has the smallest AIC. So it’s useful for comparing models, but isn’t interpretable on its own.
+
+model2 <-  glm(num.met.infect ~ treatment, poisson)
 summary(model2)
 ```
 
@@ -315,7 +343,7 @@ summary(model2)
 
 ``` r
 #see how the models compare to each other using an anova
-anova(glmmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2
+anova(glmintmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2?
 ```
 
     ## Analysis of Deviance Table
@@ -325,5 +353,25 @@ anova(glmmodel,model2, test = "Chi") #not significantly different, so we're ok u
     ##   Resid. Df Resid. Dev Df Deviance Pr(>Chi)
     ## 1        30     61.742                     
     ## 2        33     63.600 -3  -1.8576   0.6025
+
+``` r
+# Ashley suggested to keep the variety interaction even though it's not significant
+
+#test the model that you think fits best with the Hosmer Lemeshow goodness of fit test.
+# install.packages("ResourceSelection") #need this package for the hoslem.test() function.
+library(ResourceSelection)
+```
+
+    ## ResourceSelection 0.3-5   2019-07-22
+
+``` r
+hoslem.test(Fall22EPF$num.met.infect, fitted(model2))
+```
+
+    ## 
+    ##  Hosmer and Lemeshow goodness of fit (GOF) test
+    ## 
+    ## data:  Fall22EPF$num.met.infect, fitted(model2)
+    ## X-squared = -3.3327e-19, df = 8, p-value = 1
 
 # Plot the GLM model

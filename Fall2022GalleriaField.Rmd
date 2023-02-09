@@ -32,6 +32,9 @@ Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
 
 #Prelim data check
 ```{r, eval=TRUE}
+#histogram of the distribution of number of metarhizium infected insects
+hist(Fall22EPF$num.met.infect)
+
 ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
 ```
 # Stats for Metarhizium - normal ANOVA way?
@@ -40,7 +43,7 @@ attach(Fall22EPF)
 
 ##two way ANOVA
 two.way.Met <- aov(prop.met.inf~treatment*variety)
-summary(two.way.Met) #no signifcant differences, no interaction, change to one way model instead
+summary(two.way.Met) #no signifcant differences, no interaction, change to one way model instead?
 summary.lm(two.way.Met)
 
 ##one way anova
@@ -56,17 +59,10 @@ fligner.test(prop.met.inf~treatment) #normal
 MetF22KW <- kruskal.test(prop.met.inf~treatment)
 print(MetF22KW) #not significant
 
-```
-
-# Try a different type of analysis? Could this data be proportions?
-## X is categorical, unsure what to do with Y? 
-```{r, eval=TRUE}
-
+#make some graphs
 head(Fall22EPF)
-par(mfrow = c(1,2))
 
 plot(treatment, prop.met.inf, ylab = "proportion met infected", xlab("Treatment"))
-plot(treatment, log(inf.proportion), ylab = "(log)proportion met infected", xlab("Treatment")) #messes up the plots because of an outlier?
 
 #nice plot
 met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fill = treatment)) + 
@@ -79,7 +75,10 @@ met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fil
 #centered the title and made an object
 met.inf.F22 <- met.inf.F22 + theme(plot.title = element_text(hjust = 0.5))
 met.inf.F22
+
 ```
+
+# Try a different type of analysis? X is categorical, Y is continuous/counts (but is a proportion)
 
 #Try a GLM?
 ## can use a GLM when the variance is not constant, and/or when the errors are not normally distributed
@@ -91,11 +90,23 @@ names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae 
 tapply(num.met.infect, treatment, mean)
 tapply(num.met.infect, variety, mean)
 
-#glm model of interactions between treatment and variety
-glmmodel <- glm(num.met.infect ~ treatment * variety, poisson)
-summary(glmmodel) #no interaction, remove variety as a main effect
+#check with error distribution works best with this data
+library(MASS)
+fit1 <- fitdistr(Fall22EPF$num.met.infect, "normal")
+fit2 <- fitdistr(Fall22EPF$num.met.infect, "Poisson")
+fit3 <- fitdistr(Fall22EPF$num.met.infect, "negative binomial")
 
-#R reports two forms of deviance – the null deviance and the residual deviance. The null deviance shows how well the response variable is predicted by a model that includes only the intercept (grand mean). It’s a measure of badness of fit–higher numbers indicate worse fit.
+#check the AIC of the three error distributions
+AIC(fit1, fit2, fit3) #the smaller the AIC, the better fit. Negative binomial seems to be the best.
+
+#glm model of interactions between treatment and variety - Poisson error distribution
+glmintmodel <- glm(num.met.infect ~ treatment * variety, poisson)
+summary(glmintmodel) #no interaction
+
+#glm model of interactions between treatment and variety - negative binomial error distribution
+
+
+#R reports two forms of deviance – the null deviance and the residual deviance. The null deviance shows how well the response variable is predicted by a model that includes only the intercept (grand mean). It’s a measure of badness of fit–higher numbers indicate worse fit.  As a general rule of thumb, you should hope that your Residual deviance is not more than twice your degrees of freedom.
 
 #The Akaike Information Criterion (AIC) provides a method for assessing the quality of your model through comparison of related models.  It’s based on the Deviance, but penalizes you for making the model more complicated.  Much like adjusted R-squared, it’s intent is to prevent you from including irrelevant predictors. However, unlike adjusted R-squared, the number itself is not meaningful. If you have more than one similar candidate models (where all of the variables of the simpler model occur in the more complex models), then you should select the model that has the smallest AIC. So it’s useful for comparing models, but isn’t interpretable on its own.
 
@@ -103,8 +114,8 @@ model2 <-  glm(num.met.infect ~ treatment, poisson)
 summary(model2)
 
 #see how the models compare to each other using an anova
-anova(glmmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2
-plot(model2)
+anova(glmintmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2?
+# Ashley suggested to keep the variety interaction even though it's not significant
 
 #test the model that you think fits best with the Hosmer Lemeshow goodness of fit test.
 # install.packages("ResourceSelection") #need this package for the hoslem.test() function.

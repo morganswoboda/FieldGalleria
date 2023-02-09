@@ -1,7 +1,7 @@
 ---
 title: "Fall 2022 Galleria field infection data"
 author: "Morgan Swoboda"
-date: "2023-02-08"
+date: "2023-02-09"
 output: github_document
 ---
 
@@ -32,31 +32,28 @@ Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
 
 #Prelim data check
 ```{r, eval=TRUE}
-ggplot(data = Fall22EPF, aes(x = treatment, y = perc.inf.total, color = variety)) + geom_boxplot() + ggtitle("Total infection")
-#everything looks ok
-
-ggplot(data = Fall22EPF, aes(x = treatment, y = perc.met.total, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
+ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
 ```
 # Stats for Metarhizium - normal ANOVA way?
 ```{r,eval=TRUE}
 attach(Fall22EPF)
 
 ##two way ANOVA
-two.way.Met <- aov(perc.met.total~treatment*variety)
+two.way.Met <- aov(prop.met.inf~treatment*variety)
 summary(two.way.Met) #no signifcant differences, no interaction, change to one way model instead
 summary.lm(two.way.Met)
 
 ##one way anova
-one.way.Met <- aov(perc.met.total~treatment)
+one.way.Met <- aov(prop.met.inf~treatment)
 summary(one.way.Met) #not significant
 summary.lm(one.way.Met)
 plot(one.way.Met) #probably not normal based on QQ plot, looks like it's exponential?
 shapiro.test(resid(one.way.Met)) #residuals NOT normal
-fligner.test(perc.met.total~treatment) #normal
+fligner.test(prop.met.inf~treatment) #normal
 
 # KW instead since it's not normal
 ##KW for met
-MetF22KW <- kruskal.test(perc.met.total~treatment)
+MetF22KW <- kruskal.test(prop.met.inf~treatment)
 print(MetF22KW) #not significant
 
 ```
@@ -68,10 +65,20 @@ print(MetF22KW) #not significant
 head(Fall22EPF)
 par(mfrow = c(1,2))
 
-inf.proportion <- num.met.infect/total.out #looking for the proportion of metarhizium infections out of the number of removed insects
-plot(treatment, inf.proportion, ylab = "proportion met infected", xlab("Treatment"))
+plot(treatment, prop.met.inf, ylab = "proportion met infected", xlab("Treatment"))
 plot(treatment, log(inf.proportion), ylab = "(log)proportion met infected", xlab("Treatment")) #messes up the plots because of an outlier?
 
+#nice plot
+met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fill = treatment)) + 
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
+  geom_errorbar(stat = "summary", fun.data = "mean_se", aes(x=treatment), position = "dodge", width = 0.5) + 
+  ylab("Proportion of G. mellonella infected by M. anisopliae") + 
+  theme_classic() + theme(text = element_text(size=15)) + 
+  theme(legend.position = "none") + ggtitle("Fall 2022")
+
+#centered the title and made an object
+met.inf.F22 <- met.inf.F22 + theme(plot.title = element_text(hjust = 0.5))
+met.inf.F22
 ```
 
 #Try a GLM?

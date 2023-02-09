@@ -42,7 +42,7 @@ Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
 #Fall22EPF$num.met.infect = as.numeric(Fall22EPF$num.met.infect)
 ```
 
-\#Prelim data check
+# Prelim data check
 
 ``` r
 #histogram of the distribution of number of metarhizium infected insects
@@ -52,11 +52,13 @@ hist(Fall22EPF$num.met.infect)
 ![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
-ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + ggtitle("Metarhizium infection")
+ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + 
+  ggtitle("Metarhizium infection")
 ```
 
 ![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
-\# Stats for Metarhizium - normal ANOVA way?
+
+# Stats for Metarhizium - normal ANOVA way?
 
 ``` r
 attach(Fall22EPF)
@@ -160,7 +162,7 @@ fligner.test(prop.met.inf~treatment) #normal
     ## Fligner-Killeen:med chi-squared = 0.5765, df = 2, p-value = 0.7496
 
 ``` r
-# KW instead since it's not normal
+#KW instead since it's not normal
 ##KW for met
 MetF22KW <- kruskal.test(prop.met.inf~treatment)
 print(MetF22KW) #not significant
@@ -201,7 +203,8 @@ plot(treatment, prop.met.inf, ylab = "proportion met infected", xlab("Treatment"
 ``` r
 #nice plot
 met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fill = treatment)) + 
-  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
+  geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + 
+  scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
   geom_errorbar(stat = "summary", fun.data = "mean_se", aes(x=treatment), position = "dodge", width = 0.5) + 
   ylab("Proportion of G. mellonella infected by M. anisopliae") + 
   theme_classic() + theme(text = element_text(size=15)) + 
@@ -216,15 +219,14 @@ met.inf.F22
 
 # Try a different type of analysis? X is categorical, Y is continuous/counts (but is a proportion)
 
-\#Try a GLM? \## can use a GLM when the variance is not constant, and/or
-when the errors are not normally distributed \### Might consider using
-GLMs when the response variable is: count data expressed as proportions,
-count data that are not proportions, binary response variables, data on
-time to death where the varience increases faster than linearly with the
-mean
+# Try a GLM?
+
+## can use a GLM when the variance is not constant, and/or when the errors are not normally distributed
+
+### Might consider using GLMs when the response variable is: count data expressed as proportions, count data that are not proportions, binary response variables, data on time to death where the varience increases faster than linearly with the mean
 
 ``` r
-names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited Metarhizium infections
+names(Fall22EPF) 
 ```
 
     ##  [1] "pot.ID"         "treatment"      "variety"        "num.dead"      
@@ -232,6 +234,10 @@ names(Fall22EPF) #num.dead is the number of galleria counted as dead, num.pupae 
     ##  [9] "num.met.infect" "prop.met.inf"   "prop.bb.inf"
 
 ``` r
+#num.dead is the number of galleria counted as dead, num.pupae is the number that pupated, total.out
+#is the sum of num.dead and num.pupae, num.met.infect is the number of galleria that exhibited
+#Metarhizium infections
+
 #look at main effect means
 tapply(num.met.infect, treatment, mean)
 ```
@@ -306,12 +312,23 @@ summary(glmintmodel) #no interaction
     ## Number of Fisher Scoring iterations: 5
 
 ``` r
-#glm model of interactions between treatment and variety - negative binomial error distribution
+#glm model of interactions between treatment and variety - negative binomial
+#error distribution
 
 
-#R reports two forms of deviance – the null deviance and the residual deviance. The null deviance shows how well the response variable is predicted by a model that includes only the intercept (grand mean). It’s a measure of badness of fit–higher numbers indicate worse fit.  As a general rule of thumb, you should hope that your Residual deviance is not more than twice your degrees of freedom.
+#R reports two forms of deviance – the null deviance and the residual deviance. The null deviance
+#shows how well the response variable is predicted by a model that includes only the intercept
+#(grand mean). It’s a measure of badness of fit–higher numbers indicate worse fit.  As a general
+#rule of thumb, you should hope that your Residual deviance is not more than twice your degrees of
+#freedom.
 
-#The Akaike Information Criterion (AIC) provides a method for assessing the quality of your model through comparison of related models.  It’s based on the Deviance, but penalizes you for making the model more complicated.  Much like adjusted R-squared, it’s intent is to prevent you from including irrelevant predictors. However, unlike adjusted R-squared, the number itself is not meaningful. If you have more than one similar candidate models (where all of the variables of the simpler model occur in the more complex models), then you should select the model that has the smallest AIC. So it’s useful for comparing models, but isn’t interpretable on its own.
+#The Akaike Information Criterion (AIC) provides a method for assessing the quality of your model 
+#through comparison of related models.  It’s based on the Deviance, but penalizes you for making the
+#model more complicated.  Much like adjusted R-squared, it’s intent is to prevent you from including
+#irrelevant predictors. However, unlike adjusted R-squared, the number itself is not meaningful. If
+#you have more than one similar candidate models (where all of the variables of the simpler model
+#occur in the more complex models), then you should select the model that has the smallest AIC. So
+#it’s useful for comparing models, but isn’t interpretable on its own.
 
 model2 <-  glm(num.met.infect ~ treatment, poisson)
 summary(model2)

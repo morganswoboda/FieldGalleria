@@ -107,6 +107,6 @@ hoslem.test(Fall22EPF$num.met.infect, fitted(model2))
 ```
 # Plot the GLM model
 ```{r, eval=TRUE}
-plotGLM(model = model2)
+
 ```
 

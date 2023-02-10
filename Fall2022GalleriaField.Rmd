@@ -130,10 +130,10 @@ summary(glmintmodel2) #no interaction
 
 # not including interaction term 
 nointmodel <-  glm(num.met.infect ~ treatment, poisson)
-summary(model2)
+summary(nointmodel)
 
 #see how the models compare to each other using an anova
-anova(glmintmodel,glmintmodel2,model2, test = "Chi") #not significantly different, so we're ok using the model2?
+anova(glmintmodel,glmintmodel2,nointmodel, test = "Chi") #not significantly different, so we're ok using the model2?
 # Ashley suggested to keep the variety interaction even though it's not significant
 #the model2 doesn't seem like a good fit
 

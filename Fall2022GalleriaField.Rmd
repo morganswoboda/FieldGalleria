@@ -111,7 +111,9 @@ summary(glmintmodel) #no interaction
 
 #glm model of interactions between treatment and variety - negative binomial
 #error distribution
-glmintmodel2 <- glm.nb(num.met.infect ~ treatment * variety) #using glm.nb() - A modification of the system function glm() to include estimation of the additional parameter, theta, for a Negative Binomial generalized linear model.
+glmintmodel2 <- glm.nb(num.met.infect ~ treatment * variety) 
+#using glm.nb() - A modification of the system function glm() to include estimation of the 
+#additional parameter, theta, for a Negative Binomial generalized linear model.
 summary(glmintmodel2) #no interaction
 
 #R reports two forms of deviance – the null deviance and the residual deviance. The null deviance

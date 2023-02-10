@@ -103,7 +103,7 @@ fit2 <- fitdistr(Fall22EPF$num.met.infect, "Poisson")
 fit3 <- fitdistr(Fall22EPF$num.met.infect, "negative binomial")
 
 #check the AIC of the three error distributions
-AIC(fit1, fit2, fit3) #the smaller the AIC, the better fit. Negative binomial seems to be the best.
+AIC(fit1, fit2, fit3) #the smaller the AIC, the better fit. Negative binomial seems to be the best?
 
 #glm model of interactions between treatment and variety - Poisson error distribution
 glmintmodel <- glm(num.met.infect ~ treatment * variety, poisson)
@@ -111,7 +111,8 @@ summary(glmintmodel) #no interaction
 
 #glm model of interactions between treatment and variety - negative binomial
 #error distribution
-
+glmintmodel2 <- glm.nb(num.met.infect ~ treatment * variety) #using glm.nb() - A modification of the system function glm() to include estimation of the additional parameter, theta, for a Negative Binomial generalized linear model.
+summary(glmintmodel2) #no interaction
 
 #R reports two forms of deviance – the null deviance and the residual deviance. The null deviance
 #shows how well the response variable is predicted by a model that includes only the intercept
@@ -127,20 +128,29 @@ summary(glmintmodel) #no interaction
 #occur in the more complex models), then you should select the model that has the smallest AIC. So
 #it’s useful for comparing models, but isn’t interpretable on its own.
 
-model2 <-  glm(num.met.infect ~ treatment, poisson)
+# not including interaction term 
+nointmodel <-  glm(num.met.infect ~ treatment, poisson)
 summary(model2)
 
 #see how the models compare to each other using an anova
-anova(glmintmodel,model2, test = "Chi") #not significantly different, so we're ok using the model2?
+anova(glmintmodel,glmintmodel2,model2, test = "Chi") #not significantly different, so we're ok using the model2?
 # Ashley suggested to keep the variety interaction even though it's not significant
+#the model2 doesn't seem like a good fit
 
+#try again without the last model
+anova(glmintmodel,glmintmodel2, test = "Chi")
+
+#install.packages("rcompanion") #this package is needed for the compareGLM function to compare model fits
+library(rcompanion)
+compareGLM(glmintmodel, glmintmodel2) #neg binomial still looks the best?
+
+#not using this code below
 #test the model that you think fits best with the Hosmer Lemeshow goodness of fit test.
 # install.packages("ResourceSelection") #need this package for the hoslem.test() function.
-library(ResourceSelection)
-
-hoslem.test(Fall22EPF$num.met.infect, fitted(model2))
+#library(ResourceSelection)
+#hoslem.test(Fall22EPF$num.met.infect, fitted(model2))
 ```
-# Plot the GLM model
+# Now that we know the Negative Binomial error distribution is probably the pest fit, analyze the data
 ```{r, eval=TRUE}
 
 ```

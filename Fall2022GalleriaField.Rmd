@@ -152,6 +152,14 @@ compareGLM(glmintmodel, glmintmodel2) #neg binomial still looks the best?
 ```
 # Now that we know the Negative Binomial error distribution is probably the pest fit, analyze the data
 ```{r, eval=TRUE}
+#Using a Chi Squared bc proportions
+met.inf.anova <- anova(glmintmodel2, test = "Chisq") #running the chi sqaured test
+met.inf.anova #no signficant differences
+emmeans::emmeans(glmintmodel2, pairwise~treatment, type="response") #looking at mean comparisons, no signficant differences
+```
+# Graph the GLM model
+## I think the graph should be the same as the ANOVA graph before?
+```{r, eval=TRUE}
 
 ```
 

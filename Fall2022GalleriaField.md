@@ -219,6 +219,8 @@ met.inf.F22
 
 ![](Fall2022GalleriaField_files/figure-gfm/unnamed-chunk-3-6.png)<!-- -->
 
+# *Evertyhing below this was just to try it out - staying with anovas/non-parametric (ABOVE)*
+
 # Try a different type of analysis? X is categorical, Y is discrete?
 
 # Try a GLM?
@@ -330,7 +332,7 @@ summary(glmintmodel) #no interaction
 #histogram of the residuals - looks like negative binomial
 ggplot(data = Fall22EPF, aes(x = glmintmodel$residuals)) +
     geom_histogram(fill = 'steelblue', color = 'black') +
-    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+    labs(title = 'Histogram of Residuals - Poisson', x = 'Residuals', y = 'Frequency')
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -382,7 +384,7 @@ summary(glmintmodel2) #no interaction
 #histogram of the residuals
 ggplot(data = Fall22EPF, aes(x = glmintmodel2$residuals)) +
     geom_histogram(fill = 'steelblue', color = 'black') +
-    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+    labs(title = 'Histogram of Residuals - NB', x = 'Residuals', y = 'Frequency')
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -437,7 +439,7 @@ summary(nointmodel)
 #histogram of the residuals
 ggplot(data = Fall22EPF, aes(x = nointmodel$residuals)) +
     geom_histogram(fill = 'steelblue', color = 'black') +
-    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+    labs(title = 'Histogram of Residuals - no interaction', x = 'Residuals', y = 'Frequency')
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
@@ -557,3 +559,17 @@ emmeans::emmeans(glmintmodel2, pairwise~treatment, type="response") #looking at 
     ## Tests are performed on the log scale
 
 # using the lmer for GLMM??
+
+``` r
+#install.packages("lme4")
+library(lme4)
+```
+
+    ## Loading required package: Matrix
+
+    ## 
+    ## Attaching package: 'Matrix'
+
+    ## The following objects are masked from 'package:tidyr':
+    ## 
+    ##     expand, pack, unpack

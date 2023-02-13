@@ -1,7 +1,7 @@
 ---
 title: "Fall 2022 Galleria field infection data"
 author: "Morgan Swoboda"
-date: "2023-02-09"
+date: "2023-02-13"
 output: github_document
 ---
 
@@ -19,7 +19,7 @@ library(ggthemes)
 library(RColorBrewer)
 
 #import data
-Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1.csv", )
+Fall22EPF <- read.csv("Fall 22 epf bioassay - Sheet1 (1).csv", )
 
 #make treatments and varieties into factors
 Fall22EPF$treatment = factor(Fall22EPF$treatment, levels = c("Control", "10Met", "10Bb"))
@@ -35,21 +35,31 @@ Fall22EPF$variety = factor(Fall22EPF$variety, levels = c("Cochise", "Armani"))
 #histogram of the distribution of number of metarhizium infected insects
 hist(Fall22EPF$num.met.infect)
 
+#need to make a histogram of the residuals?
+
+#proportion of met infected
 ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + 
-  ggtitle("Metarhizium infection")
+  ggtitle("Proportion of Metarhizium infection")
+
+#number of met infected
+ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, color = variety)) + geom_boxplot() + 
+  ggtitle("Number of Metarhizium infection")
+#the same graph basically, but that makes sense?
 ```
 
-# Stats for Metarhizium - normal ANOVA way?
+# Stats for Metarhizium - ANOVA
+## This is how I've analyzed all the previous data
+### Do I use the number of met infection, or the proportions?
 ```{r,eval=TRUE}
 attach(Fall22EPF)
 
 ##two way ANOVA
-two.way.Met <- aov(prop.met.inf~treatment*variety)
+two.way.Met <- aov(perc.met.inf~treatment*variety)
 summary(two.way.Met) #no signifcant differences, no interaction, change to one way model instead?
 summary.lm(two.way.Met)
 
 ##one way anova
-one.way.Met <- aov(prop.met.inf~treatment)
+one.way.Met <- aov(perc.met.inf~treatment)
 summary(one.way.Met) #not significant
 summary.lm(one.way.Met)
 plot(one.way.Met) #probably not normal based on QQ plot, looks like it's exponential?
@@ -58,20 +68,20 @@ fligner.test(prop.met.inf~treatment) #normal
 
 #KW instead since it's not normal
 ##KW for met
-MetF22KW <- kruskal.test(prop.met.inf~treatment)
+MetF22KW <- kruskal.test(perc.met.inf~treatment)
 print(MetF22KW) #not significant
 
 #make some graphs
-head(Fall22EPF)
-
-plot(treatment, prop.met.inf, ylab = "proportion met infected", xlab("Treatment"))
+par(mfrow = c(1,2))
+plot(treatment, num.met.infect, ylab = "number of met infected")
+plot(treatment, perc.met.inf, ylab = "prop met infected")
 
 #nice plot
-met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = prop.met.inf, fill = treatment)) + 
+met.inf.F22 <- ggplot(data = Fall22EPF, aes(x = treatment, y = perc.met.inf, fill = treatment)) + 
   geom_bar(stat = "summary", fun = "mean", position = "dodge", color = "black") + 
   scale_fill_manual(values=c("#B31B1B", "#ddd3c2", "#221f1b")) +
   geom_errorbar(stat = "summary", fun.data = "mean_se", aes(x=treatment), position = "dodge", width = 0.5) + 
-  ylab("Proportion of G. mellonella infected by M. anisopliae") + 
+  ylab("Percent of G. mellonella infected by M. anisopliae") + 
   theme_classic() + theme(text = element_text(size=15)) + 
   theme(legend.position = "none") + ggtitle("Fall 2022")
 
@@ -81,7 +91,7 @@ met.inf.F22
 
 ```
 
-# Try a different type of analysis? X is categorical, Y is continuous/counts (but is a proportion)
+# Try a different type of analysis? X is categorical, Y is discrete?
 
 # Try a GLM?
 ## can use a GLM when the variance is not constant, and/or when the errors are not normally distributed
@@ -93,21 +103,29 @@ names(Fall22EPF)
 #Metarhizium infections
 
 #look at main effect means
+tapply(prop.met.inf, treatment, mean)
 tapply(num.met.infect, treatment, mean)
-tapply(num.met.infect, variety, mean)
+tapply(prop.met.inf, variety, mean)
 
 #check with error distribution works best with this data
 library(MASS)
-fit1 <- fitdistr(Fall22EPF$num.met.infect, "normal")
+fit1 <- fitdistr(Fall22EPF$prop.met.inf, "normal")
 fit2 <- fitdistr(Fall22EPF$num.met.infect, "Poisson")
-fit3 <- fitdistr(Fall22EPF$num.met.infect, "negative binomial")
+fit3 <- fitdistr(Fall22EPF$prop.met.inf, "exponential")
+fit4 <- fitdistr(Fall22EPF$num.met.infect, "negative binomial")
 
 #check the AIC of the three error distributions
-AIC(fit1, fit2, fit3) #the smaller the AIC, the better fit. Negative binomial seems to be the best?
+AIC(fit1, fit2, fit3, fit4) #the smaller the AIC, the better fit. 
+#fit 1 and 3 have negative AICs?
 
 #glm model of interactions between treatment and variety - Poisson error distribution
 glmintmodel <- glm(num.met.infect ~ treatment * variety, poisson)
 summary(glmintmodel) #no interaction
+
+#histogram of the residuals - looks like negative binomial
+ggplot(data = Fall22EPF, aes(x = glmintmodel$residuals)) +
+    geom_histogram(fill = 'steelblue', color = 'black') +
+    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
 
 #glm model of interactions between treatment and variety - negative binomial
 #error distribution
@@ -115,6 +133,11 @@ glmintmodel2 <- glm.nb(num.met.infect ~ treatment * variety)
 #using glm.nb() - A modification of the system function glm() to include estimation of the 
 #additional parameter, theta, for a Negative Binomial generalized linear model.
 summary(glmintmodel2) #no interaction
+
+#histogram of the residuals
+ggplot(data = Fall22EPF, aes(x = glmintmodel2$residuals)) +
+    geom_histogram(fill = 'steelblue', color = 'black') +
+    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
 
 #R reports two forms of deviance – the null deviance and the residual deviance. The null deviance
 #shows how well the response variable is predicted by a model that includes only the intercept
@@ -134,6 +157,11 @@ summary(glmintmodel2) #no interaction
 nointmodel <-  glm(num.met.infect ~ treatment, poisson)
 summary(nointmodel)
 
+#histogram of the residuals
+ggplot(data = Fall22EPF, aes(x = nointmodel$residuals)) +
+    geom_histogram(fill = 'steelblue', color = 'black') +
+    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+
 #see how the models compare to each other using an anova
 anova(glmintmodel,glmintmodel2,nointmodel, test = "Chi") #not significantly different, so we're ok using the model2?
 # Ashley suggested to keep the variety interaction even though it's not significant
@@ -152,6 +180,7 @@ compareGLM(glmintmodel, glmintmodel2) #neg binomial still looks the best?
 #library(ResourceSelection)
 #hoslem.test(Fall22EPF$num.met.infect, fitted(model2))
 ```
+
 # Now that we know the Negative Binomial error distribution is probably the pest fit, analyze the data
 ```{r, eval=TRUE}
 #Using a Chi Squared bc proportions
@@ -159,8 +188,7 @@ met.inf.anova <- anova(glmintmodel2, test = "Chisq") #running the chi sqaured te
 met.inf.anova #no signficant differences
 emmeans::emmeans(glmintmodel2, pairwise~treatment, type="response") #looking at mean comparisons, no signficant differences
 ```
-# Graph the GLM model
-## I think the graph should be the same as the ANOVA graph before?
+# using the lmer for GLMM??
 ```{r, eval=TRUE}
 
 ```

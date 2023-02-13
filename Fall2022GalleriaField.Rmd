@@ -91,6 +91,7 @@ met.inf.F22
 
 ```
 
+# *Evertyhing below this was just to try it out - staying with anovas/non-parametric (ABOVE)*
 # Try a different type of analysis? X is categorical, Y is discrete?
 
 # Try a GLM?
@@ -125,7 +126,7 @@ summary(glmintmodel) #no interaction
 #histogram of the residuals - looks like negative binomial
 ggplot(data = Fall22EPF, aes(x = glmintmodel$residuals)) +
     geom_histogram(fill = 'steelblue', color = 'black') +
-    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+    labs(title = 'Histogram of Residuals - Poisson', x = 'Residuals', y = 'Frequency')
 
 #glm model of interactions between treatment and variety - negative binomial
 #error distribution
@@ -137,7 +138,7 @@ summary(glmintmodel2) #no interaction
 #histogram of the residuals
 ggplot(data = Fall22EPF, aes(x = glmintmodel2$residuals)) +
     geom_histogram(fill = 'steelblue', color = 'black') +
-    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+    labs(title = 'Histogram of Residuals - NB', x = 'Residuals', y = 'Frequency')
 
 #R reports two forms of deviance – the null deviance and the residual deviance. The null deviance
 #shows how well the response variable is predicted by a model that includes only the intercept
@@ -160,7 +161,7 @@ summary(nointmodel)
 #histogram of the residuals
 ggplot(data = Fall22EPF, aes(x = nointmodel$residuals)) +
     geom_histogram(fill = 'steelblue', color = 'black') +
-    labs(title = 'Histogram of Residuals', x = 'Residuals', y = 'Frequency')
+    labs(title = 'Histogram of Residuals - no interaction', x = 'Residuals', y = 'Frequency')
 
 #see how the models compare to each other using an anova
 anova(glmintmodel,glmintmodel2,nointmodel, test = "Chi") #not significantly different, so we're ok using the model2?
@@ -190,6 +191,7 @@ emmeans::emmeans(glmintmodel2, pairwise~treatment, type="response") #looking at 
 ```
 # using the lmer for GLMM??
 ```{r, eval=TRUE}
-
+install.packages("lme4")
+library(lme4)
 ```
 
